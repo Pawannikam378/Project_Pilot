@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: projectpilot-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: projectpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build:
+      context: ./backend
+    container_name: projectpilot-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://admin:password@db:5432/projectpilot
+      - SECRET_KEY=supersecretkey_change_in_production
+      - JWT_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=1440
+      - DEMO_MODE=True
+      # Override in production
+      # - OPENAI_API_KEY=your_openai_key
+      # - AWS_ACCESS_KEY_ID=
+      # - AWS_SECRET_ACCESS_KEY=
+      # - AWS_REGION=
+      # - AWS_BUCKET_NAME=
+      # - RAZORPAY_KEY_ID=
+      # - RAZORPAY_KEY_SECRET=
+    depends_on:
+      - db
+    # We mount the backend directory as a volume to enable hot-reloading
+    volumes:
+      - ./backend:/app
+      - local_uploads:/app/uploads # Persist local upload mock
+    restart: always
+
+volumes:
+  postgres_data:
+  local_uploads:
