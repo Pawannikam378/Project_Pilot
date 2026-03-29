@@ -42,6 +42,21 @@ services:
       - local_uploads:/app/uploads # Persist local upload mock
     restart: always
 
+  frontend:
+    build:
+      context: ./frontend
+    container_name: projectpilot-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: always
+
 volumes:
   postgres_data:
   local_uploads:
