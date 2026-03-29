@@ -12,6 +12,9 @@ app = FastAPI(
     version="1.0.0"
 )
 
+import os
+from fastapi.staticfiles import StaticFiles
+
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
@@ -20,6 +23,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Include Routers
 app.include_router(auth.router, prefix="/api", tags=["Authentication"])
