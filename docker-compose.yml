@@ -12,6 +12,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d projectpilot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     restart: always
 
   backend:
@@ -35,7 +40,8 @@ services:
       # - RAZORPAY_KEY_ID=
       # - RAZORPAY_KEY_SECRET=
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     # We mount the backend directory as a volume to enable hot-reloading
     volumes:
       - ./backend:/app
