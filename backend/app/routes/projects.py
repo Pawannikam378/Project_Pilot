@@ -18,14 +18,18 @@ async def upload_project(
     current_user: models.User = Depends(auth.get_current_user)
 ):
     # Check usage limits
+    from datetime import datetime
     usage = db.query(models.Usage).filter(models.Usage.user_id == current_user.id).first()
     if not usage:
-        raise HTTPException(status_code=400, detail="Usage record missing")
+        usage = models.Usage(user_id=current_user.id, month_year=datetime.utcnow().strftime("%Y-%m"), upload_count=0)
+        db.add(usage)
+        db.commit()
+        db.refresh(usage)
 
     if current_user.plan == "free" and usage.upload_count >= 3:
         raise HTTPException(status_code=402, detail="Upload limit reached for free plan")
 
-    if not file.filename.endswith(('.pdf', '.docx', '.pptx')):
+    if not file.filename or not file.filename.lower().endswith(('.pdf', '.docx', '.pptx')):
         raise HTTPException(status_code=400, detail="Only PDF, DOCX, and PPTX files are supported")
 
     # 1. Save file (Local or S3)
