@@ -115,7 +115,7 @@ export default function ProjectDetails() {
               >
                 <Download className="-ml-1 mr-2 h-4 w-4" /> Download Presentation (PPTX)
               </a>
-            )}
+            ) : null}
           </div>
         </div>
 
